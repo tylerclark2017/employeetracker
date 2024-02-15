@@ -1,6 +1,8 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
+
+      
 // Create a connection to the MySQL database
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -19,22 +21,36 @@ const connection = mysql.createConnection({
       type: 'list',
       name: 'action',
       message: 'Select an action:',
-      choices: ['View all employees', 'Add employee', 'Update employee role', 'Delete employee', 'Exit']
+      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Search for an employee', 'Exit']
     }
   ]).then((answers) => {
     // Handle user input based on selected action
     switch (answers.action) {
         case 'View all departments':
+            viewDepartments();
             break;
         case 'View all roles':
+            viewRoles();
             break;
       case 'View all employees':
+        viewEmployees();
         // Implement logic to view all employees
         break;
-      case 'Add employee':
+        case 'Add a department':
+            addDepartment();
+            break;
+        case 'Add a role':
+            addRole();
+            break;
+      case 'Add an employee':
+        addEmployee();
         // Implement logic to add a new employee
         break;
+        case 'Update an employee role':
+            updateEmployeeRole();
+            break;
         case 'Search for employee':
+            searchEmployee();
     inquirer.prompt([
         {
             type: 'input',
@@ -70,6 +86,7 @@ const connection = mysql.createConnection({
         process.exit(0);
     }
   });
+
   // Query to retrieve all employees
 connection.query('SELECT * FROM employee', (err, results) => {
   if (err) {
