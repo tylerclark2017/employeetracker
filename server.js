@@ -20,27 +20,48 @@ function startMenu () {
         });
         break;
       case 'View all roles':
-        viewRoles();
+        viewRoles().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         break;
       case 'View all employees':
-        viewEmployees();
+        viewEmployees().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         // Implement logic to view all employees
         break;
       case 'Add a department':
-        addDepartment();
+        addDepartment().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         break;
       case 'Add a role':
-        addRole();
+        addRole().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         break;
       case 'Add an employee':
-        addEmployee();
+        addEmployee().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         // Implement logic to add a new employee
         break;
       case 'Update an employee role':
-        updateEmployeeRole();
+        updateEmployeeRole().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         break;
       case 'Search for employee':
-        searchEmployee();
+        searchEmployee().then(([results])=>{
+          console.table(results);
+          startMenu();
+        });
         break;
       default:
         console.log('Exiting application');
