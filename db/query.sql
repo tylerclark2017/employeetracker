@@ -22,4 +22,4 @@ INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('John'
 
 -- Query to search for an employee by name or ID
 -- Replace 'John' with the name or ID of the employee to search for
-SELECT * FROM employee WHERE first_name = 'John' OR last_name = 'John' OR id = 'John';
+SELECT * FROM employee WHERE first_name = '' OR last_name = '' OR id = '';
