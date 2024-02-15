@@ -21,29 +21,17 @@ function viewDepartments() {
 }
 
 function viewRoles() {
-    const query = 'SELECT role.id, role.title, department.name AS department, role.salary FROM role JOIN department ON role.department_id = department.id';
-    connection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
-        console.table(results);
-    });
+    const viewRolesQuery = 'SELECT role.id, role.title, department.name AS department, role.salary FROM role JOIN department ON role.department_id = department.id';
+    return connection.promise().query(viewRolesQuery)
 }
 
 function viewEmployees() {
-    const query = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, manager.first_name AS manager_first_name, manager.last_name AS manager_last_name
+    const viewEmployeesQuery = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, manager.first_name AS manager_first_name, manager.last_name AS manager_last_name
                   FROM employee
                   LEFT JOIN role ON employee.role_id = role.id
                   LEFT JOIN department ON role.department_id = department.id
                   LEFT JOIN employee manager ON employee.manager_id = manager.id`;
-    connection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
-        console.table(results);
-    });
+    return connection.promise().query(viewEmployeesQuery)
 }
 
 function addDepartment() {
@@ -56,23 +44,14 @@ function addDepartment() {
     ]).then((answers) => {
         const name = answers.name;
         const query = `INSERT INTO department (name) VALUES ('${name}')`;
-        connection.query(query, (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                return;
-            }
-            console.log(`Added department with ID ${results.insertId}.`);
-        });
+        return connection.promise().query(query);
     });
 }
 
 function addRole() {
     const departmentQuery = 'SELECT * FROM department';
-    connection.query(departmentQuery, (err, departments) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
+    return connection.promise().query(departmentQuery)
+    .then(([departments]) => {
         inquirer.prompt([
             {
                 type: 'input',
@@ -97,14 +76,8 @@ function addRole() {
             const title = answers.title;
             const salary = answers.salary;
             const department_id = answers.department_id;
-            const query = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
-            connection.query(query, (err, results) => {
-                if (err) {
-                    console.error('Error executing query:', err);
-                    return;
-                }
-                console.log(`Added role with ID ${results.insertId}.`);
-            });
+            const addRoleQuery = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
+            return connection.promise().query(addRoleQuery);
         });
     });
 }
@@ -112,16 +85,10 @@ function addRole() {
 function addEmployee() {
     const roleQuery = 'SELECT * FROM role';
     const managerQuery = 'SELECT * FROM employee';
-    connection.query(roleQuery, (err, roles) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
-        connection.query(managerQuery, (err, managers) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                return;
-            }
+    return connection.promise().query(roleQuery)
+    .then(([roles]) => {
+        return connection.promise().query(managerQuery)
+        .then(([managers]) => {
             inquirer.prompt([
                 {
                     type: 'input',
@@ -156,14 +123,8 @@ function addEmployee() {
                 const last_name = answers.last_name;
                 const role_id = answers.role_id;
                 const manager_id = answers.manager_id;
-                const query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
-                connection.query(query, (err, results) => {
-                    if (err) {
-                        console.error('Error executing query:', err);
-                        return;
-                    }
-                    console.log(`Added employee with ID ${results.insertId}.`);
-                });
+                const addEmployeeQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
+                return connection.promise().query(addEmployeeQuery);
             });
         });
     });
@@ -172,16 +133,10 @@ function addEmployee() {
 function updateEmployeeRole() {
     const employeeQuery = 'SELECT * FROM employee';
     const roleQuery = 'SELECT * FROM role';
-    connection.query(employeeQuery, (err, employees) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
-        connection.query(roleQuery, (err, roles) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                return;
-            }
+    return connection.promise().query(employeeQuery)
+    .then(([employees]) => {
+        return connection.promise().query(roleQuery)
+        .then(([roles]) => {
             inquirer.prompt([
                 {
                     type: 'list',
@@ -204,21 +159,15 @@ function updateEmployeeRole() {
             ]).then((answers) => {
                 const employee_id = answers.employee_id;
                 const role_id = answers.role_id;
-                const query = `UPDATE employee SET role_id = ${role_id} WHERE id = ${employee_id}`;
-                connection.query(query, (err, results) => {
-                    if (err) {
-                        console.error('Error executing query:', err);
-                        return;
-                    }
-                    console.log(`Updated employee with ID ${employee_id} with new role.`);
-                });
+                const updateEmployeeRoleQuery = `UPDATE employee SET role_id = ${role_id} WHERE id = ${employee_id}`;
+                return connection.promise().query(updateEmployeeRoleQuery);
             });
         });
     });
 }
 
 function searchEmployee() {
-    inquirer.prompt([
+    return inquirer.prompt([
         {
             type: 'input',
             name: 'searchQuery',
@@ -226,28 +175,15 @@ function searchEmployee() {
         }
     ]).then((answers) => {
         const searchQuery = answers.searchQuery;
-        const query = `SELECT * FROM employee WHERE first_name = '${searchQuery}' OR last_name = '${searchQuery}' OR id = '${searchQuery}'`;
-        connection.query(query, (err, results) => {
-            if (err) {
-                console.error('Error executing search query:', err);
-                return;
-            }
-            if (results.length === 0) {
-                console.log('No employee found with the provided search query.');
-            } else {
-                console.log('Search results:', results);
-            }
-        });
+        const searchEmployeeQuery = `SELECT * FROM employee WHERE first_name = '${searchQuery}' OR last_name = '${searchQuery}' OR id = '${searchQuery}'`;
+        return connection.promise().query(searchEmployeeQuery);
     });
 }
 
 function updateEmployeeManager() {
     const employeeQuery = 'SELECT * FROM employee';
-    connection.query(employeeQuery, (err, employees) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
+    return connection.promise().query(employeeQuery)
+    .then(([employees]) => {
         inquirer.prompt([
             {
                 type: 'list',
@@ -270,25 +206,16 @@ function updateEmployeeManager() {
         ]).then((answers) => {
             const employee_id = answers.employee_id;
             const new_manager_id = answers.new_manager_id;
-            const query = `UPDATE employee SET manager_id = ${new_manager_id} WHERE id = ${employee_id}`;
-            connection.query(query, (err, results) => {
-                if (err) {
-                    console.error('Error executing query:', err);
-                    return;
-                }
-                console.log(`Updated employee with ID ${employee_id} with new manager.`);
-            });
+            const updateEmployeeManagerQuery = `UPDATE employee SET manager_id = ${new_manager_id} WHERE id = ${employee_id}`;
+            return connection.promise().query(updateEmployeeManagerQuery);
         });
     });
 }
 
 function viewEmployeesByManager() {
     const employeeQuery = 'SELECT * FROM employee';
-    connection.query(employeeQuery, (err, employees) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return;
-        }
+    return connection.promise().query(employeeQuery)
+    .then(([employees]) => {
         inquirer.prompt([
             {
                 type: 'list',
@@ -301,22 +228,17 @@ function viewEmployeesByManager() {
             }
         ]).then((answers) => {
             const manager_id = answers.manager_id;
-            const query = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, manager.first_name AS manager_first_name, manager.last_name AS manager_last_name
+            const viewEmployeesbyManagerQuery = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, manager.first_name AS manager_first_name, manager.last_name AS manager_last_name
                           FROM employee
                           LEFT JOIN role ON employee.role_id = role.id
                           LEFT JOIN department ON role.department_id = department.id
                           LEFT JOIN employee manager ON employee.manager_id = manager.id
                           WHERE employee.manager_id = ${manager_id}`;
-            connection.query(query, (err, results) => {
-                if (err) {
-                    console.error('Error executing query:', err);
-                    return;
-                }
-                console.table(results);
-            });
+            return connection.promise().query(viewEmployeesbyManagerQuery);
         });
     });
 }
+
 
 module.exports = {viewDepartments, viewRoles, viewEmployees, addDepartment, addRole, addEmployee, updateEmployeeRole, searchEmployee, updateEmployeeManager,viewEmployeesByManager}
 
