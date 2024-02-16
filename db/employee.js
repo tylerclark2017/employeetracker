@@ -1,19 +1,5 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
-
-// Create a connection to the MySQL database
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Catsare#1',
-    database: 'employees_db'
-  });
-  
-  // Connect to the database
-  connection.connect((err) => {
-    if (err) throw err;
-    console.log('Connected to the database.');
-  });
+const connection = require('./connection');
 
 function viewDepartments() {
     const departmentQuery = 'SELECT * FROM department';
@@ -34,57 +20,22 @@ function viewEmployees() {
     return connection.promise().query(viewEmployeesQuery)
 }
 
-function addDepartment() {
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'name',
-            message: 'Enter the name of the department:'
-        }
-    ]).then((answers) => {
-        const name = answers.name;
-        const query = `INSERT INTO department (name) VALUES ('${name}')`;
-        return connection.promise().query(query);
-    });
+function addDepartment(name) {
+    const addDepartmentQuery = 'INSERT INTO department (name) VALUES (?)';
+     return connection.promise().query(addDepartmentQuery, name);
 }
 
-function addRole() {
-    const departmentQuery = 'SELECT * FROM department';
-    return connection.promise().query(departmentQuery)
-    .then(([departments]) => {
-        inquirer.prompt([
-            {
-                type: 'input',
-                name: 'title',
-                message: 'Enter the title of the role:'
-            },
-            {
-                type: 'input',
-                name: 'salary',
-                message: 'Enter the salary for the role:'
-            },
-            {
-                type: 'list',
-                name: 'department_id',
-                message: 'Select the department for the role:',
-                choices: departments.map((department) => ({
-                    name: department.name,
-                    value: department.id
-                }))
-            }
-        ]).then((answers) => {
-            const title = answers.title;
-            const salary = answers.salary;
-            const department_id = answers.department_id;
-            const addRoleQuery = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
-            return connection.promise().query(addRoleQuery);
-        });
-    });
-}
+function addRole(title, salary, department_id) {
+            const addRoleQuery = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+            const  roleParams = [title, salary, department_id];
+            return connection.promise().query(addRoleQuery, roleParams);
+            
+};
 
 function addEmployee() {
     const roleQuery = 'SELECT * FROM role';
     const managerQuery = 'SELECT * FROM employee';
+    // 
     return connection.promise().query(roleQuery)
     .then(([roles]) => {
         return connection.promise().query(managerQuery)
@@ -123,6 +74,7 @@ function addEmployee() {
                 const last_name = answers.last_name;
                 const role_id = answers.role_id;
                 const manager_id = answers.manager_id;
+                // move 36-75 into server.js file!
                 const addEmployeeQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
                 return connection.promise().query(addEmployeeQuery);
             });
