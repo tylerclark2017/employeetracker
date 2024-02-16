@@ -12,4 +12,7 @@
 
  Here is a link to my GitHub repository for this Challenge: https://github.com/tylerclark2017/employeetracker
 
+ I ran out of free Screencastify videos, so I signed up for Loom. The video is here: https://www.loom.com/share/64f0efba257f4ca69b5d099fb454d050?sid=975c08e4-675c-4aa6-87b8-b5cc98130973
+ 
+
  

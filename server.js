@@ -81,24 +81,68 @@ function startMenu() {
     });       
         break;
       case 'Add an employee':
-        addEmployee().then(([results]) => {
-          console.table(results);
-          startMenu();
+      return connection.promise().query(roleQuery)
+        .then(([roles]) => {
+          return connection.promise().query(managerQuery)
+            .then(([managers]) => {
+              inquirer.prompt([
+                {
+                  type: 'input',
+                  name: 'first_name',
+                  message: 'Enter the first name of the employee:'
+                },
+                {
+                  type: 'input',
+                  name: 'last_name',
+                  message: 'Enter the last name of the employee:'
+                },
+                {
+                  type: 'list',
+                  name: 'role_id',
+                  message: 'Select the role for the employee:',
+                  choices: roles.map((role) => ({
+                    name: role.title,
+                    value: role.id
+                  }))
+                },
+                {
+                  type: 'list',
+                  name: 'manager_id',
+                  message: 'Select the manager for the employee:',
+                  choices: managers.map((manager) => ({
+                    name: `${manager.first_name} ${manager.last_name}`,
+                    value: manager.id
+                  }))
+                }
+              ]).then((answers) => {
+                const first_name = answers.first_name;
+                const last_name = answers.last_name;
+                const role_id = answers.role_id;
+                const manager_id = answers.manager_id;
+      
+                switch (answers.choice) {
+                  case 'Add a new employee':
+                    addEmployee(first_name, last_name, role_id, manager_id).then(([results]) => {
+                      console.table(results);
+                      startMenu();
+                    });
+                    break;
+                  case 'Update an employee role':
+                    updateEmployeeRole().then(([results]) => {
+                      console.table(results);
+                      startMenu();
+                    });
+                    break;
+                  case 'Search for employee':
+                    searchEmployee().then(([results]) => {
+                      console.table(results);
+                      startMenu();
+                    });
+                    break;
+                }
+              });
+            });
         });
-        // Implement logic to add a new employee
-        break;
-      case 'Update an employee role':
-        updateEmployeeRole().then(([results]) => {
-          console.table(results);
-          startMenu();
-        });
-        break;
-      case 'Search for employee':
-        searchEmployee().then(([results]) => {
-          console.table(results);
-          startMenu();
-        });
-        break;
       default:
         console.log('Exiting application');
         process.exit(0);
